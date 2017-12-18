@@ -1,0 +1,27 @@
+package report;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class reportBatchProcessor {
+
+	public static void main(String[] args) throws SQLException, ClassNotFoundException {
+
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+		   String conUrl = "jdbc:sqlserver://localhost:1433/mssqlservernew;databaseName=report";
+		   Connection con = DriverManager.getConnection(conUrl,"reportUser","report1234!");
+	       con.setAutoCommit(false); 
+
+		String SPsql = "EXEC dbo.report";   // for stored proc taking 2 parameters
+		
+		PreparedStatement ps = con.prepareStatement(SPsql);
+		ps.setEscapeProcessing(true);
+		ps.setQueryTimeout(30);
+		
+		ResultSet rs = ps.executeQuery();
+	}
+
+}

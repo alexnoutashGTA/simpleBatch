@@ -1,0 +1,5 @@
+dbHost=jdbc:sqlserver://DESKTOP-8BSSUGT\\MSSQLSERVERNEW;databaseName=report
+dbUser=reportUser
+dbPassword=report1234!
+dbStp=report
+outputFolder=c:\temp\report.txt

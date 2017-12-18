@@ -1,0 +1,114 @@
+package report;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.logging.*;
+
+public class reportBatchProcessor {
+
+	public static void main(String[] args) throws ClassNotFoundException {
+		 log.log(Level.SEVERE,"Property file is not found:"+ex.getMessage());
+		
+		try {
+			File configFile = new File("application.properties");
+		    FileReader reader = new FileReader(configFile);
+		    Properties props = new Properties();
+		    props.load(reader);
+		    host = props.getProperty("dbHost");
+		    user = props.getProperty("dbUser");
+		    password = props.getProperty("dbPassword");
+		    outputFolder = props.getProperty("outputFolder");
+		    stpName = props.getProperty("dbStp");
+		    reader.close();
+		} catch (FileNotFoundException ex) {
+			 log.log(Level.SEVERE,"Property file is not found:"+ex.getMessage());
+		   
+		} catch (IOException ex) {
+			 log.log(Level.SEVERE,"Error while reading property file:"+ex.getMessage());
+		   
+		}
+		generateReportFromDB(host,user,password,stpName, outputFolder);
+	}
+	private static void generateReportFromDB(String host, String userName, String password, String stp, String folderName) throws ClassNotFoundException {
+		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+		PrintWriter reportWriter = null;
+		try {
+		   Connection con = DriverManager.getConnection(host,userName,password);
+	       con.setAutoCommit(false); 
+	       String SPsql = "EXEC "+stp;   
+		   PreparedStatement ps = con.prepareStatement(SPsql);
+		   ps.setEscapeProcessing(true);
+		   ps.setQueryTimeout(30);
+		   ResultSet rs = ps.executeQuery();
+		   FileWriter fw = new FileWriter(folderName, true);
+	       BufferedWriter bw = new BufferedWriter(fw);
+	       reportWriter = new PrintWriter(bw);
+	       writeHeader(reportWriter);
+	       while (rs.next()) {  
+	    	   reportWriter.print("worklistSupplementalData");
+	    	   reportWriter.print(",");
+	    	   reportWriter.print("accountNumber");
+	    	   reportWriter.print(",");
+	    	   reportWriter.print("submittedDate");
+	    	   reportWriter.print(",");
+	    	   reportWriter.print("status");
+	    	   reportWriter.print(",");
+	    	   reportWriter.print("lastUpdate");
+	    	   reportWriter.print(",");
+	    	   reportWriter.print("SLACategoryName");	     
+	    	   reportWriter.println(" ");
+	    	}
+	       con.close();
+	    }		
+		catch (SQLException e) { 
+		   log.log(Level.SEVERE,"SQL Exception:"+e.getMessage());
+		}
+		
+	    catch (IOException e) {
+	    	log.log(Level.SEVERE,"IO Exception:"+e.getMessage());
+	    }
+	    catch (Exception e) {
+	    	log.log(Level.SEVERE,"General Exception:"+e.getMessage());
+		}
+		finally {
+			if (reportWriter!=null) {
+				reportWriter.flush();
+				reportWriter.close();
+			}
+		}
+	}
+	
+	private static void writeHeader(PrintWriter reportWriter) {
+	   reportWriter.print("worklistSupplementalData");
+  	   reportWriter.print(",");
+  	   reportWriter.print("accountNumber");
+  	   reportWriter.print(",");
+  	   reportWriter.print("submittedDate");
+  	   reportWriter.print(",");
+  	   reportWriter.print("status");
+  	   reportWriter.print(",");
+  	   reportWriter.print("lastUpdate");
+  	   reportWriter.print(",");
+  	   reportWriter.print("SLACategoryName");	     
+  	   reportWriter.println(" ");
+	}
+
+	private static String host;
+	private static String user;
+	private static String password;
+	private static String outputFolder;
+	private static String stpName;
+	private static final Logger log = Logger.getLogger("reportBatchProcessor");
+}
+

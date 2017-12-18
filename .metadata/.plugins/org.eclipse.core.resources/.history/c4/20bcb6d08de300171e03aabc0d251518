@@ -1,0 +1,61 @@
+package report;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Properties;
+
+public class reportBatchProcessor {
+
+	private static String host;
+	private static String user;
+	private static String password;
+	private static String outputFolder;
+	
+	public static void main(String[] args) throws ClassNotFoundException {
+		
+		File configFile = new File("resource\\application.properties");
+		try {
+		    FileReader reader = new FileReader(configFile);
+		    Properties props = new Properties();
+		    props.load(reader);
+		 
+		    host = props.getProperty("dbHost");
+		    user = props.getProperty("dbUser");
+		    password = props.getProperty("dbPassword");
+		    outputFolder = props.getProperty("outputFolder");
+		    
+		    reader.close();
+		} catch (FileNotFoundException ex) {
+		    //Log file does not exist
+		} catch (IOException ex) {
+		    // I/O error
+	
+		}
+	}
+	private static void generateReportFromDB(String host, String userName, String password) throws ClassNotFoundException {
+		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+	    try {
+		   Connection con = DriverManager.getConnection(host,userName,password);
+	       con.setAutoCommit(false); 
+	       String SPsql = "EXEC dbo.report";   // for stored proc taking 2 parameters
+		   PreparedStatement ps = con.prepareStatement(SPsql);
+		   ps.setEscapeProcessing(true);
+		   ps.setQueryTimeout(30);
+		   ResultSet rs = ps.executeQuery();
+		}
+		catch (SQLException e) { 
+		   //Log ("SQL Exception:"+e.getMessage());
+		}
+		catch (Exception e) {
+		   //Log("General Exception:"+e.getMessage());
+		}
+	}
+}
+
