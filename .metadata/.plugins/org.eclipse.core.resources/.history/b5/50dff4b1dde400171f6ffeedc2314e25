@@ -12,7 +12,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
@@ -30,8 +29,8 @@ public class reportBatchProcessor {
 		    FileReader reader = new FileReader(configFile);
 		    Properties props = new Properties();
 		    props.load(reader);
-		    String loggerFolder = props.getProperty("logFolder")+getTodayDate()+"-reportLog.xml";
-		    setLogger(loggerFolder);
+		    String loggerFolder = props.getProperty("logFolder");
+		    setLogger(loggerFolder+"reportLog.xml");
 		    log.log(Level.INFO,"Report batch started");
 		    String host = props.getProperty("dbHost");
 		    String user = props.getProperty("dbUser");
@@ -65,7 +64,7 @@ public class reportBatchProcessor {
 		   ps.setEscapeProcessing(true);
 		   ps.setQueryTimeout(30);
 		   ResultSet rs = ps.executeQuery();
-		   FileWriter fw = new FileWriter(folderName+getTodayDate()+"-report.csv");
+		   FileWriter fw = new FileWriter(folderName+today+"report.csv");
 	       BufferedWriter bw = new BufferedWriter(fw);
 	       reportWriter = new PrintWriter(bw);
 	       writeHeader(reportWriter);
@@ -74,11 +73,11 @@ public class reportBatchProcessor {
 	    	   reportWriter.print(",");
 	    	   reportWriter.print(rs.getString("accountNumber"));
 	    	   reportWriter.print(",");
-	    	   reportWriter.print(rs.getDate("submittedDate"));
+	    	   reportWriter.print(rs.getString("submittedDate"));
 	    	   reportWriter.print(",");
 	    	   reportWriter.print(rs.getString("status"));
 	    	   reportWriter.print(",");
-	    	   reportWriter.print(rs.getDate("lastUpdate"));
+	    	   reportWriter.print(rs.getString("lastUpdate"));
 	    	   reportWriter.print(",");
 	    	   reportWriter.print(rs.getString("SLACategoryName"));	     
 	    	   reportWriter.println(" ");
@@ -129,16 +128,7 @@ public class reportBatchProcessor {
 		}   
 	}
 	
-	private static String getTodayDate() {
-		today.add(Calendar.DATE, 1);
-		Date date = today.getTime();             
-		SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");          
-		String inActiveDate = null;
-		inActiveDate = format1.format(date);
-		return inActiveDate;
-	}
-	
 	private static final Logger log = Logger.getLogger("reportBatchProcessor");
-	private static final Calendar today = Calendar.getInstance();
+	private static final Date today = Calendar.getInstance().getTime();
 }
 

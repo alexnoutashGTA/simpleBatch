@@ -30,8 +30,8 @@ public class reportBatchProcessor {
 		    FileReader reader = new FileReader(configFile);
 		    Properties props = new Properties();
 		    props.load(reader);
-		    String loggerFolder = props.getProperty("logFolder")+getTodayDate()+"-reportLog.xml";
-		    setLogger(loggerFolder);
+		    String loggerFolder = props.getProperty("logFolder");
+		    setLogger(loggerFolder+"reportLog.xml");
 		    log.log(Level.INFO,"Report batch started");
 		    String host = props.getProperty("dbHost");
 		    String user = props.getProperty("dbUser");
